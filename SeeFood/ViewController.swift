@@ -82,8 +82,15 @@ extension ViewController: UIImagePickerControllerDelegate {
                 fatalError("Model Failed to process the image")
             }
             
-            // Test print results
-            print(results)
+           // Check the first item in the results array with the highest confidence rating percentage
+            if let firstResults = results.first {
+                if firstResults.identifier.contains("hotdog") {
+                    self.setNavBarTitle(title: "Hotdog!")
+                } else {
+                    self.setNavBarTitle(title: "Not Hotdog!")
+                }
+            }
+            
         }
         // Create a handler that helps specify the image we want to perform the ML request on
         let handler = VNImageRequestHandler(ciImage: image)
@@ -100,5 +107,10 @@ extension ViewController: UIImagePickerControllerDelegate {
 //MARK: - Delegat methods for Navigation Controller
 extension ViewController: UINavigationControllerDelegate {
     
+    /// Handles the ML logic for setting the navbar title
+    /// - Parameter title: its either a hot dog or not!
+    func setNavBarTitle(title: String)  {
+        self.navigationItem.title = title
+    }
 }
 
