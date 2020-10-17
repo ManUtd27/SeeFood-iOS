@@ -10,8 +10,8 @@ import CoreML
 import Vision
 
 class ViewController: UIViewController {
-
-   
+    
+    
     @IBOutlet weak var imageView: UIImageView!
     
     // Get th image picker object
@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         imagePicker.delegate = self
         // set the image picker source type
         imagePicker.sourceType = .camera
+        //        imagePicker.sourceType = .photoLibrary
         // Set the image picker allows editting propery
         imagePicker.allowsEditing = false
         
@@ -35,6 +36,7 @@ class ViewController: UIViewController {
     @IBAction func cameraTapped(_ sender: UIBarButtonItem) {
         // Presents the impage picker object when the camera button is pressed
         present(imagePicker, animated: true, completion: nil)
+        
     }
 }
 
@@ -51,9 +53,46 @@ extension ViewController: UIImagePickerControllerDelegate {
         if let userPickedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             // Set that picked image as the image in the imageView
             imageView.image = userPickedImage
+            
+            // Convert the user Picked image to a CiImage which allows proccessing by CoreML and Vision
+            guard let ciImage = CIImage(image: userPickedImage) else {
+                fatalError("Could not convert to CIImage")
+            }
+            // Call the detect function using our cIImage
+            detect(image: ciImage)
+            
         }
         // Dismiss the image picker after the selection
         imagePicker.dismiss(animated: true, completion: nil)
+    }
+    
+    
+    /// Handles the dectection for the image Using the CoreML Model
+    /// - Parameter image: The converted userpicked image
+    func detect(image: CIImage) {
+            // Create a model using the InceptionV3 model in file path
+        guard let model =  try? VNCoreMLModel(for: Inceptionv3().model) else {
+            fatalError("Loading CoreML Model Failed")
+        }
+        
+        // Create a request to Vision using a request and the model
+        let request = VNCoreMLRequest(model: model) { (request, error) in
+            // Get the request results as an array of VNClassificationObservation
+            guard let results = request.results as? [VNClassificationObservation] else {
+                fatalError("Model Failed to process the image")
+            }
+            
+            // Test print results
+            print(results)
+        }
+        // Create a handler that helps specify the image we want to perform the ML request on
+        let handler = VNImageRequestHandler(ciImage: image)
+        do {
+            // Try and perform request using the handler
+            try handler.perform([request])
+        } catch {
+            print(error)
+        }
     }
     
 }
