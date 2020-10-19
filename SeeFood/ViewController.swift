@@ -27,7 +27,7 @@ class ViewController: UIViewController {
         //        imagePicker.sourceType = .photoLibrary
         // Set the image picker allows editting propery
         imagePicker.allowsEditing = false
-        
+        self.setNavBarTitle(title: "See Food!")
     }
     
     
@@ -111,6 +111,11 @@ extension ViewController: UINavigationControllerDelegate {
     /// - Parameter title: its either a hot dog or not!
     func setNavBarTitle(title: String)  {
         self.navigationItem.title = title
+        if title == "Hotdog!" {
+            navigationController?.navigationBar.barTintColor = .green
+        } else if title == "Not Hotdog!"  {
+            navigationController?.navigationBar.barTintColor = .red
+        }
     }
 }
 
